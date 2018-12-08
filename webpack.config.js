@@ -3,9 +3,10 @@ module.exports = {
     'cowjs': './src/index.ts',
     'cowjs-core': './src/cowjs-core/index.ts',
     'cowjs-eosjs': './src/cowjs-eosjs/index.ts',
-    'cowjs-eosjs-jsonrpc': './src/cowjs-eosjs/eosjs-jsonrpc.ts'
+    'cowjs-eosjs-jsonrpc': './src/cowjs-eosjs/eosjs-jsonrpc.ts',
+    'cowjs-eosjs-eosjs': './src/cowjs-eosjs/eosjs.ts'
   },
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   mode: 'production',
   output: {
     filename: '[name].js',
