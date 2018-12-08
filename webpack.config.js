@@ -1,13 +1,17 @@
 module.exports = {
   entry: {
-    cowjs: './src/cowjs-core.ts',
-    cowjs_plugin_eosjs: './src/cowjs-eosjs.ts'
+    'cowjs': './src/index.ts',
+    'cowjs-core': './src/cowjs-core/index.ts',
+    'cowjs-eosjs': './src/cowjs-eosjs/index.ts',
+    'cowjs-eosjs-jsonrpc': './src/cowjs-eosjs/eosjs-jsonrpc.ts'
   },
   devtool: 'inline-source-map',
-  mode: 'development',
+  mode: 'production',
   output: {
-    library: 'cowjs',
+    filename: '[name].js',
+    path: __dirname + '/dist',
     pathinfo: true,
+    libraryTarget: 'umd'
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"]

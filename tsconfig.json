@@ -3,7 +3,7 @@
     "outDir": "./dist/",
     "sourceMap": true,
     "noImplicitAny": true,
-    "module": "commonjs",
+    "module": "es6",
     "target": "es5",
     "moduleResolution": "node",
     "declaration": true,
@@ -14,6 +14,6 @@
     ]
   },
   "include": [
-    "./src/**/*"
+    "src"
   ]
 }
