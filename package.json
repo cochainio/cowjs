@@ -1,6 +1,6 @@
 {
   "name": "cowjs",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Importable JavaScript library that allows web applications to directly interface with Cochain Wallet.",
   "scripts": {
     "build": "webpack"
@@ -10,6 +10,7 @@
   "author": "RideWindX <ridewindx@163.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/bytebuffer": "^5.0.37",
     "@types/node": "^10.11.7",
     "awesome-typescript-loader": "^5.2.1",
     "source-map-loader": "^0.2.4",

@@ -1,7 +1,7 @@
 import Plugin from './plugin'
 
 export class PluginRepositorySingleton {
-    plugins: Plugin[]
+    plugins: Plugin[] = []
 
     loadPlugin (plugin: Plugin) {
         if (!this.plugin(plugin.name)) {

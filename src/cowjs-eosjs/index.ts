@@ -28,28 +28,34 @@ export interface SignatureProvider {
 }
 
 export default class CowEOS extends Plugin {
-    static blockchain: string = 'eos'
-
-    constructor () {
-        super(CowEOS.blockchain)
+    constructor (public blockchain: string = 'EOS') {
+        super(blockchain)
     }
 
     hookProvider (network: Network, fieldsFetcher?: () => object): SignatureProvider {
         return {
             getAvailableKeys: async () => {
                 const keys = await Service.call('getAvailableKeys', {
-                    blockchain: CowEOS.blockchain
+                    blockchain: this.blockchain
                 })
                 return keys as string[]
             },
 
             sign: async (signatureProviderArgs: SignatureProviderArgs) => {
-                const requiredFields = fieldsFetcher ? fieldsFetcher() : {}
+                const requiredFields: any = fieldsFetcher ? fieldsFetcher() : {}
+
+                const eos = requiredFields.eos
+                delete requiredFields.eos
+                const tx = await eos.deserializeTransactionWithActions(signatureProviderArgs.serializedTransaction)
 
                 const args = {
-                    blockchain: CowEOS.blockchain,
+                    blockchain: this.blockchain,
                     network,
-                    signatureProviderArgs,
+                    signatureProviderArgs: {
+                        ...signatureProviderArgs,
+                        serializedTransaction: Buffer.from(signatureProviderArgs.serializedTransaction).toString('hex'),
+                        transaction: tx
+                    },
                     requiredFields
                 }
                 const sigatures = await Service.call('signTransaction', args)
@@ -59,20 +65,26 @@ export default class CowEOS extends Plugin {
     }
 
     signatureProvider () {
-        return (network: Network, eosjs: any, options: object) => {
-            if (!network.isValid()) {
+        return (network: object, eosjs: any, options: object) => {
+            const net = Network.fromJSON(network)
+            if (!net.isValid()) {
                 throw new Error('invalid network') // TODO
             }
 
             let requiredFields = {}
             const fieldsFetcher = () => requiredFields
-            const signatureProvider = this.hookProvider(network, fieldsFetcher)
+            const signatureProvider = this.hookProvider(net, fieldsFetcher)
 
-            return new Proxy(new eosjs(Object.assign(options, { signatureProvider })), {
+            const eos = new eosjs(Object.assign(options, { signatureProvider }))
+
+            return new Proxy(eos, {
                 get (eosjsInstance, method) {
                     return (...args: any[]) => {
                         const rqf = args.find(arg => arg.hasOwnProperty('requiredFields'))
-                        requiredFields = rqf ? rqf.requiredFields : {}
+                        requiredFields = {
+                            ...(rqf ? rqf.requiredFields : {}),
+                            eos // TODO
+                        }
                         return eosjsInstance[method](...args)
                     }
                 }

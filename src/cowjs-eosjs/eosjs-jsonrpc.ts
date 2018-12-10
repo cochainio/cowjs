@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import * as ByteBuffer from 'bytebuffer'
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from 'eosjs/src/eosjs-api-interfaces'
 import { base64ToBinary, convertLegacyPublicKeys } from 'eosjs/src/eosjs-numeric'
 import {
@@ -24,7 +25,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     constructor (endpoint: string, args: any = { timeout: 10000 }) {
         const config = {
-            url: endpoint,
+            baseURL: endpoint,
             timeout: args.timeout
         }
         this.api = axios.create(config as AxiosRequestConfig)
@@ -68,7 +69,18 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
             req.id = block_num_or_id
         }
         return this.api.post('/v1/eos/blocks', req).then(r => {
-            return r.data.blocks[0] // TODO: satisfy GetBlockResult?
+            const block = r.data.blocks[0] // TODO: satisfy GetBlockResult?
+            if (block.id) {
+                block.ref_block_prefix = ByteBuffer.fromHex(block.id.slice(16, 32),
+                                                            ByteBuffer.LITTLE_ENDIAN).readUint32()
+            }
+            if (block.timestamp && block.timestamp.endsWith('Z')) {
+                block.timestamp = block.timestamp.substr(0, block.timestamp.length - 1)
+            }
+            if (block.num) {
+                block.block_num = block.num
+            }
+            return block
         })
     }
 
@@ -112,7 +124,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
         })
     }
 
-    public async get_info (): Promise<GetInfoResult> {
+    public async get_info (): Promise<GetInfoResult> { // TODO: `get_info` returns block which `get_block` can not find
         return this.api.get('/v1/eos/info').then(r => {
             return r.data
         })
@@ -166,8 +178,9 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
     public async getRequiredKeys (args: AuthorityProviderArgs): Promise<string[]> {
+        const transaction = JSON.stringify(args.transaction)
         return this.api.post('/v1/eos/required-keys', {
-            tx: args.transaction,
+            transaction,
             available_keys: args.availableKeys,
         }).then(r => {
             return convertLegacyPublicKeys(r.data.required_keys)

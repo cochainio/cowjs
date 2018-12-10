@@ -20,8 +20,8 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<string[]>;
 }
 export default class CowEOS extends Plugin {
-    static blockchain: string;
-    constructor();
+    blockchain: string;
+    constructor(blockchain?: string);
     hookProvider(network: Network, fieldsFetcher?: () => object): SignatureProvider;
-    signatureProvider(): (network: Network, eosjs: any, options: object) => any;
+    signatureProvider(): (network: object, eosjs: any, options: object) => any;
 }

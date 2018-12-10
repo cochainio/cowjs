@@ -2,12 +2,14 @@ import CowError from './error'
 
 export default class Service {
     static callback (method: string, methodID: number, response: string) {
-        if (!this.callAwaits.has(methodID)) {
+        (console as any).log(method, methodID, JSON.parse(response))
+
+        if (!Service.callAwaits.has(methodID)) {
             console.warn(`call id ${methodID} not found`)
             return
         }
-        const [ resolve, reject ] = this.callAwaits.get(methodID)
-        this.callAwaits.delete(methodID)
+        const [ resolve, reject ] = Service.callAwaits.get(methodID)
+        Service.callAwaits.delete(methodID)
 
         const rep = JSON.parse(response)
         if (rep.code) { // failed
@@ -29,18 +31,18 @@ export default class Service {
                 args
             }))
 
-            if (this.callAwaits.has(methodID)) {
+            if (Service.callAwaits.has(methodID)) {
                 reject(new CowError(1, 'inconsistent remote exec'))
             }
 
             setTimeout(() => {
-                if (this.callAwaits.has(methodID)) {
+                if (Service.callAwaits.has(methodID)) {
                     reject(new CowError(1, 'timeout'))
-                    this.callAwaits.delete(methodID)
+                    Service.callAwaits.delete(methodID)
                 }
             }, timeout)
 
-            this.callAwaits.set(methodID, [resolve, reject])
+            Service.callAwaits.set(methodID, [resolve, reject])
         })
     }
 

@@ -3,4 +3,5 @@ export default class CowError extends Error {
     message: string;
     name: string;
     constructor(code: number, message: string);
+    toString(): string;
 }

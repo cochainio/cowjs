@@ -8,4 +8,8 @@ export default class CowError extends Error {
             Error.captureStackTrace(this, CowError)
         }
     }
+
+    toString (): string {
+        return `${this.name}: < code: ${this.code}, message: ${this.message} >`
+    }
 }
