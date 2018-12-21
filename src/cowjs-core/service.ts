@@ -20,16 +20,35 @@ export default class Service {
     }
 
     static async call (method: string, args: object, timeout: number = 120000) { // default timeout is 120s
+        const w = (window as any)
         // Lazily set callback
-        if (!(window as any).cochain.callback) {
-            (window as any).cochain.callback = Service.callback
+        if (!w.cochain.callback) {
+            w.cochain.callback = Service.callback
         }
 
         return new Promise((resolve, reject) => {
-            const methodID = (window as any).cochain.exec(JSON.stringify({
+            const req = {
                 method,
                 args
-            }))
+            }
+
+            let methodID: number
+            if (w.cochain.exec) { // Android
+                methodID = w.cochain.exec(JSON.stringify(req))
+            } else if (w.webkit && w.webkit.messageHandlers && w.webkit.messageHandlers.cochain) { // iOS
+                methodID = w.cochain.nextMethodID++
+                if (!(methodID >= 0)) {
+                    reject(new CowError(1, 'no valid method id'))
+                    return
+                }
+                w.webkit.messageHandlers.cochain.postMessage({
+                    ...req,
+                    methodID
+                })
+            } else {
+                reject(new CowError(1, 'only support android or ios platform under cordova'))
+                return
+            }
 
             if (Service.callAwaits.has(methodID)) {
                 reject(new CowError(1, 'inconsistent remote exec'))
