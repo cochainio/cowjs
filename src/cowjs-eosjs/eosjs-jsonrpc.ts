@@ -11,6 +11,7 @@ import {
     GetRawCodeAndAbiResult,
     PushTransactionArgs
 } from 'eosjs/src/eosjs-rpc-interfaces'
+import RpcError from 'eosjs/src/eosjs-rpcerror'
 
 function arrayToHex (data: Uint8Array) {
     let result = ''
@@ -189,16 +190,38 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Push a serialized transaction */
     public async push_transaction ({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
-        return this.api.post('/v1/eos/txs', {
-            tx: JSON.stringify({
-                signatures,
-                packed_trx: arrayToHex(serializedTransaction)
+        let r
+        try {
+            r = await this.api.post('/v1/eos/txs', {
+                tx: JSON.stringify({
+                    signatures,
+                    packed_trx: arrayToHex(serializedTransaction)
+                })
             })
-        }).then(r => {
-            return {
-                transaction_id: r.data.tx_id // TODO: other fields
+        } catch (e) {
+            // TODO: 10027 corresponds CodeSendTransactionError
+            if (e && e.response && e.response.data && e.response.data.code === 10027) {
+                const msg = JSON.parse(e.response.data.message)
+                throw new RpcError(msg)
+            } else {
+                throw e
             }
-        })
+        }
+
+        let processed
+        if (r.data && r.data.processed) {
+            processed = JSON.parse(r.data.processed)
+            if (processed && processed.except) {
+                throw new RpcError({
+                    transaction_id: r.data.tx_id,
+                    processed
+                })
+            }
+        }
+        return {
+            transaction_id: r.data.tx_id,
+            processed
+        }
     }
 
     public async db_size_get () {
