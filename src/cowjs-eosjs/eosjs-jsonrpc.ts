@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import * as ByteBuffer from 'bytebuffer'
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from 'eosjs/src/eosjs-api-interfaces'
-import { base64ToBinary, convertLegacyPublicKeys } from 'eosjs/src/eosjs-numeric'
+import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from 'eosjs/dist/eosjs-api-interfaces'
+import { base64ToBinary, convertLegacyPublicKeys } from 'eosjs/dist/eosjs-numeric'
 import {
     Abi,
     GetAbiResult,
@@ -10,8 +10,8 @@ import {
     GetInfoResult,
     GetRawCodeAndAbiResult,
     PushTransactionArgs
-} from 'eosjs/src/eosjs-rpc-interfaces'
-import RpcError from 'eosjs/src/eosjs-rpcerror'
+} from 'eosjs/dist/eosjs-rpc-interfaces'
+import { RpcError } from 'eosjs/dist/eosjs-rpcerror'
 
 function arrayToHex (data: Uint8Array) {
     let result = ''

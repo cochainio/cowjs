@@ -1,4 +1,5 @@
 import { Network, Plugin, Service } from '../cowjs-core'
+import './scatter'
 
 export interface BinaryAbi {
     account_name: string
