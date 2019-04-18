@@ -574,15 +574,15 @@ t.exports=function(t){return null!=t&&(r(t)||function(t){return"function"==typeo
 /*!**********************************!*\
   !*** ./src/cowjs-eosjs/eosjs.ts ***!
   \**********************************/
-/*! exports provided: Api, ApiInterfaces, JsonRpc, RpcError, RpcInterfaces, Serialize, JsSignatureProvider */
+/*! exports provided: convertLegacyPublicKey, Api, ApiInterfaces, JsonRpc, RpcError, RpcInterfaces, Serialize, JsSignatureProvider */
 /*! all exports used */
 /*! ModuleConcatenation bailout: Module is an entry point */,
 /*!**********************************!*\
   !*** ./src/cowjs-eosjs/eosjs.ts ***!
   \**********************************/
-/*! exports provided: Api, ApiInterfaces, JsonRpc, RpcError, RpcInterfaces, Serialize, JsSignatureProvider */
+/*! exports provided: convertLegacyPublicKey, Api, ApiInterfaces, JsonRpc, RpcError, RpcInterfaces, Serialize, JsSignatureProvider */
 /*! all exports used */
-/*! ModuleConcatenation bailout: Module is an entry point */function(t,e,r){"use strict";r.r(e);var n=r(/*! eosjs */7);r.d(e,"Api",function(){return n.Api}),r.d(e,"ApiInterfaces",function(){return n.ApiInterfaces}),r.d(e,"RpcError",function(){return n.RpcError}),r.d(e,"RpcInterfaces",function(){return n.RpcInterfaces}),r.d(e,"Serialize",function(){return n.Serialize});var i=r(/*! eosjs/dist/eosjs-jssig */63);r.d(e,"JsSignatureProvider",function(){return i.JsSignatureProvider});var o=r(/*! ./eosjs-jsonrpc */31);r.d(e,"JsonRpc",function(){return o.default});var s={Api:n.Api,ApiInterfaces:n.ApiInterfaces,JsonRpc:o.default,RpcError:n.RpcError,RpcInterfaces:n.RpcInterfaces,Serialize:n.Serialize,JsSignatureProvider:i.JsSignatureProvider};window.Eos=s},
+/*! ModuleConcatenation bailout: Module is an entry point */function(t,e,r){"use strict";r.r(e);var n=r(/*! eosjs */7);r.d(e,"Api",function(){return n.Api}),r.d(e,"ApiInterfaces",function(){return n.ApiInterfaces}),r.d(e,"RpcError",function(){return n.RpcError}),r.d(e,"RpcInterfaces",function(){return n.RpcInterfaces}),r.d(e,"Serialize",function(){return n.Serialize});var i=r(/*! eosjs/dist/eosjs-jssig */63);r.d(e,"JsSignatureProvider",function(){return i.JsSignatureProvider});var o=r(/*! ./eosjs-jsonrpc */31);r.d(e,"JsonRpc",function(){return o.default});var s=r(/*! eosjs/dist/eosjs-numeric */6);r.d(e,"convertLegacyPublicKey",function(){return s.convertLegacyPublicKey});var a={Api:n.Api,ApiInterfaces:n.ApiInterfaces,JsonRpc:o.default,RpcError:n.RpcError,RpcInterfaces:n.RpcInterfaces,Serialize:n.Serialize,JsSignatureProvider:i.JsSignatureProvider};window.Eos=a},
 /*!**********************************************!*\
   !*** ./node_modules/eosjs/dist/eosjs-api.js ***!
   \**********************************************/
