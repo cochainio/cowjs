@@ -23,18 +23,20 @@ function arrayToHex (data: Uint8Array) {
 
 export default class JsonRpc implements AuthorityProvider, AbiProvider {
     public api: AxiosInstance
+    public coin: string
 
-    constructor (endpoint: string, args: any = { timeout: 10000 }) {
+    constructor (endpoint: string, args: any = { coin: 'eos', timeout: 10000 }) {
         const config = {
             baseURL: endpoint,
             timeout: args.timeout
         }
         this.api = axios.create(config as AxiosRequestConfig)
+        this.coin = args.coin
     }
 
     // tslint:disable-next-line:variable-name
     public async get_abi (account_name: string): Promise<GetAbiResult> {
-        return this.api.get('/v1/eos/contracts/' + account_name).then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/contracts/` + account_name).then(r => {
             const abiStr = r.data.abi
             const abi = JSON.parse(abiStr)
             return {
@@ -46,7 +48,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     // tslint:disable-next-line:variable-name
     public async get_account (account_name: string): Promise<any> {
-        return this.api.get('/v1/eos/accounts/' + account_name).then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/accounts/` + account_name).then(r => {
             return r.data
         })
     }
@@ -69,7 +71,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
         } else {
             req.id = block_num_or_id
         }
-        return this.api.post('/v1/eos/blocks', req).then(r => {
+        return this.api.post(`/v1/eos/${this.coin}/blocks`, req).then(r => {
             const block = r.data.blocks[0] // TODO: satisfy GetBlockResult?
             if (block.id) {
                 block.ref_block_prefix = ByteBuffer.fromHex(block.id.slice(16, 32),
@@ -87,7 +89,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     // tslint:disable-next-line:variable-name
     public async get_code (account_name: string, code_as_wasm: boolean = false): Promise<GetCodeResult> {
-        return this.api.get('/v1/eos/contracts/' + account_name, {
+        return this.api.get(`/v1/eos/${this.coin}/contracts/` + account_name, {
             params: { include_code: true, raw: true, wast: !code_as_wasm }
         }).then(r => {
             const abiStr = r.data.abi
@@ -103,7 +105,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     public async get_currency_balance (code: string, account: string, symbol: string = null): Promise<any> {
-        return this.api.get(`/v1/eos/accounts/${account}/balance?contract=${code}&symbol=${symbol}`).then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/accounts/${account}/balance?contract=${code}&symbol=${symbol}`).then(r => {
             return r.data.balances.map((b: any) => {
                 return `${b.balance.toFixed(4)} ${b.symbol}` // TODO: precision may be not 4
             })
@@ -111,7 +113,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     public async get_currency_stats (code: string, symbol: string): Promise<any> {
-        return this.api.post('/v1/eos/currency/stats', {
+        return this.api.post(`/v1/eos/${this.coin}/currency/stats`, {
             currencies: [ { contract: code, symbol } ]
         }).then(r => {
             const stats = r.data.stats[0]
@@ -126,7 +128,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     public async get_info (): Promise<GetInfoResult> { // TODO: `get_info` returns block which `get_block` can not find
-        return this.api.get('/v1/eos/info').then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/info`).then(r => {
             return r.data
         })
     }
@@ -142,7 +144,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     // tslint:disable-next-line:variable-name
     public async get_raw_code_and_abi (account_name: string): Promise<GetRawCodeAndAbiResult> {
-        return this.api.get(`/v1/eos/contracts/${account_name}?include_code=true&raw=true`).then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/contracts/${account_name}?include_code=true&raw=true`).then(r => {
             return {
                 account_name,
                 wasm: r.data.wasm,
@@ -169,7 +171,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
         lower_bound = '',
         upper_bound = '',
         limit = 10 }: any): Promise<any> {
-        return this.api.post('/v1/eos/table', {
+        return this.api.post(`/v1/eos/${this.coin}/table`, {
             code, scope, table, lower_bound, upper_bound, limit,
             binary: !json
         }).then(r => {
@@ -180,7 +182,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
     public async getRequiredKeys (args: AuthorityProviderArgs): Promise<string[]> {
         const transaction = JSON.stringify(args.transaction)
-        return this.api.post('/v1/eos/required-keys', {
+        return this.api.post(`/v1/eos/${this.coin}/required-keys`, {
             transaction,
             available_keys: args.availableKeys,
         }).then(r => {
@@ -192,7 +194,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     public async push_transaction ({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
         let r
         try {
-            r = await this.api.post('/v1/eos/txs', {
+            r = await this.api.post(`/v1/eos/${this.coin}/txs`, {
                 tx: JSON.stringify({
                     signatures,
                     packed_trx: arrayToHex(serializedTransaction)
@@ -240,7 +242,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
 
     // tslint:disable-next-line:variable-name
     public async history_get_key_accounts (public_key: string) {
-        return this.api.get(`/v1/eos/accounts-for-key?public_key=${public_key}`).then(r => {
+        return this.api.get(`/v1/eos/${this.coin}/accounts-for-key?public_key=${public_key}`).then(r => {
             return {
                 account_names: r.data.accounts
             }

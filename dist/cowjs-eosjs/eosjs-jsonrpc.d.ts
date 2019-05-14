@@ -3,6 +3,7 @@ import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from
 import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from 'eosjs/dist/eosjs-rpc-interfaces';
 export default class JsonRpc implements AuthorityProvider, AbiProvider {
     api: AxiosInstance;
+    coin: string;
     constructor(endpoint: string, args?: any);
     get_abi(account_name: string): Promise<GetAbiResult>;
     get_account(account_name: string): Promise<any>;
